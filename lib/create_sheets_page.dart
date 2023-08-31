@@ -22,27 +22,10 @@ class CreateSheetsPage extends StatelessWidget {
               final id = await UserSheetsApi.getRowCount() + 1;
               final newUser = user.copy(id : id);
               await UserSheetsApi.insert([newUser.toJson()]);
-              // await UserSheetsApi.update(user.childName, user.toJson());
             },
           ),
         ),
       ),
     );
   }
-
-  // Future insertUsers() async {
-  //   final users = [
-  //     User(
-  //       childName: 'adnan',
-  //       isBoy: true,
-  //       rightHanded: false,
-  //       age: '22',
-  //       testerName: 'moka',
-  //       kinderGardenName: 'dodo',
-  //       testType: '1',
-  //     )
-  //   ];
-  //   final jsonUsers = users.map((user) => user.toJson()).toList();
-  //   await UserSheetsApi.insert(jsonUsers);
-  // }
 }

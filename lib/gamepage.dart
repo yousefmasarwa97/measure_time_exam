@@ -87,8 +87,6 @@ String getRandomPhoto() {
 
 class _GamePageState extends State<GamePage> {
   bool isButtonPressed = false;
-  // Timer? longPressTimer;
-  // DateTime? startTime;
   Icon randomArrow = getRandomArrow();
   String randomPhoto = getRandomPhoto();
   int startTime = 0;
@@ -123,8 +121,11 @@ class _GamePageState extends State<GamePage> {
       print("response time: $elapsedNanoseconds nanoseconds");
     }
     setState(() {
-      // randomArrow = Icon(Icons.);
-      // randomPhoto = 'asserts/images/black.png';
+      randomArrow = const Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      );
+      randomPhoto = 'asserts/images/black.png';
     });
   }
 
@@ -132,7 +133,6 @@ class _GamePageState extends State<GamePage> {
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         containerColor = Colors.purple;
-        // iscenterbuttonpressed = true;
       });
     });
   }
@@ -140,25 +140,8 @@ class _GamePageState extends State<GamePage> {
   void _handleReturnToFirstPage() {
     setState(() {
       containerColor = Colors.grey;
-      // iscenterbuttonpressed = false;
     });
   }
-
-  // void cancelTimer() {
-  //   longPressTimer?.cancel();
-  // }
-
-  // void startTimer() {
-  //   startTime = DateTime.now();
-  //   longPressTimer = Timer(const Duration(seconds: 5), () {
-  //     setState(() {
-  //       cancelTimer();
-  //       DateTime endTime = DateTime.now();
-  //       Duration responseTime = endTime.difference(startTime!);
-  //       print('Response time: ${responseTime.inMilliseconds} milliseconds');
-  //     });
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
