@@ -87,8 +87,13 @@ String getRandomPhoto() {
 
 class _GamePageState extends State<GamePage> {
   bool isButtonPressed = false;
-  Icon randomArrow = getRandomArrow();
-  String randomPhoto = getRandomPhoto();
+  // Icon randomArrow = getRandomArrow();
+  // String randomPhoto = getRandomPhoto();
+  Icon randomArrow = const Icon(
+    Icons.arrow_back,
+    color: Colors.black,
+  );
+  String randomPhoto = 'asserts/images/black.png';
   int startTime = 0;
   int endTime = 0;
 
@@ -129,19 +134,19 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  void _handleButtonPress() {
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        containerColor = Colors.purple;
-      });
-    });
-  }
+  // void _handleButtonPress() {
+  //   Future.delayed(Duration(seconds: 2), () {
+  //     setState(() {
+  //       containerColor = Colors.purple;
+  //     });
+  //   });
+  // }
 
-  void _handleReturnToFirstPage() {
-    setState(() {
-      containerColor = Colors.grey;
-    });
-  }
+  // void _handleReturnToFirstPage() {
+  //   setState(() {
+  //     containerColor = Colors.grey;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +176,7 @@ class _GamePageState extends State<GamePage> {
                       );
                     }
                     _handleOneOfTheCircelsIsPressed();
-                    _handleReturnToFirstPage();
+                    // _handleReturnToFirstPage();
                     startTime = 0;
                     endTime = 0;
                   });
@@ -264,7 +269,7 @@ class _GamePageState extends State<GamePage> {
                       );
                     }
                     _handleOneOfTheCircelsIsPressed();
-                    _handleReturnToFirstPage();
+                    // _handleReturnToFirstPage();
                     startTime = 0;
                     endTime = 0;
                   });

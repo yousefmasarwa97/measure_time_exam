@@ -1,6 +1,7 @@
 import 'package:excel_example/button_widget.dart';
 import 'package:excel_example/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'gamepage.dart';
 
@@ -42,7 +43,6 @@ class _UserFormWidgetState extends State<UserFormWidget> {
     controllerTesterName = TextEditingController();
     controllerKinderGardenName = TextEditingController();
     controllerTestType = TextEditingController();
-
   }
 
   @override
@@ -86,7 +86,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
 
   Widget buildName() => TextFormField(
         controller: controllerChildName,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Name',
           border: OutlineInputBorder(),
         ),
@@ -95,8 +95,12 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       );
 
   Widget buildAge() => TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly
+        ],
         controller: controllerAge,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Age',
           border: OutlineInputBorder(),
         ),
@@ -106,7 +110,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
 
   Widget buildTesterName() => TextFormField(
         controller: controllerTesterName,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Tester Name',
           border: OutlineInputBorder(),
         ),
@@ -116,8 +120,8 @@ class _UserFormWidgetState extends State<UserFormWidget> {
 
   Widget buildKinderGardenName() => TextFormField(
         controller: controllerKinderGardenName,
-        decoration: InputDecoration(
-          labelText: 'kinder Garden Name',
+        decoration: const InputDecoration(
+          labelText: 'School Name',
           border: OutlineInputBorder(),
         ),
         validator: (value) =>
@@ -125,9 +129,14 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       );
 
   Widget buildTestType() => TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.allow(RegExp('[12]')),
+          LengthLimitingTextInputFormatter(1),
+        ],
         controller: controllerTestType,
-        decoration: InputDecoration(
-          labelText: 'Test Type',
+        decoration: const InputDecoration(
+          labelText: 'Test Type(1-MainTest, 2-Inhibition)',
           border: OutlineInputBorder(),
         ),
         validator: (value) =>
@@ -138,7 +147,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         contentPadding: EdgeInsets.zero,
         controlAffinity: ListTileControlAffinity.leading,
         value: isBoy,
-        title: Text('Is Boy?'),
+        title: const Text('Is Boy?'),
         onChanged: (value) => setState(() {
           isBoy = value;
         }),
@@ -148,21 +157,20 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         contentPadding: EdgeInsets.zero,
         controlAffinity: ListTileControlAffinity.leading,
         value: rightHanded,
-        title: Text('Right Handed?'),
+        title: const Text('Right Handed?'),
         onChanged: (value) => setState(() {
           rightHanded = value;
         }),
       );
 
   Widget buildSubmit() => ButtonWidget(
-        text: 'save',
+        text: 'Start',
         onClicked: () {
           final form = formKey.currentState!;
           final isValid = form.validate();
 
           if (isValid) {
             final user = User(
-              // id: 1,
               childName: controllerChildName.text,
               age: controllerAge.text,
               isBoy: isBoy,

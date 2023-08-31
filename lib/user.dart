@@ -5,7 +5,7 @@ class UserFields {
   static final String rightHanded = 'rightHanded';
   static final String age = 'Age';
   static final String testerName = 'testerName';
-  static final String kinderGardenName = 'kinderGardenName';
+  static final String kinderGardenName = 'schoolName';
   static final String testType = 'testType';
   static final String correctAnswers = 'correctAnswers';
   static final String wrongAnswers = 'wrongAnswers';

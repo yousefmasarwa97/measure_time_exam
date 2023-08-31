@@ -14,14 +14,14 @@ class ButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        minimumSize: Size.fromHeight(50),
-        shape: StadiumBorder(),
+        minimumSize: const Size.fromHeight(50),
+        shape: const StadiumBorder(),
       ),
       onPressed: onClicked,
       child: FittedBox(
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             color: Colors.white,
           ),
