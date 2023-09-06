@@ -1,7 +1,12 @@
+import 'package:excel_example/button_config.dart';
+import 'package:excel_example/styled_button.dart';
 import 'package:excel_example/user_sheets_api.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -15,6 +20,8 @@ class GamePage extends StatefulWidget {
   State<GamePage> createState() => _GamePageState();
 }
 
+late Color redColor;
+bool pressedButton = false;
 bool isRed = false;
 bool isRightArrow = false;
 bool isRanbow = false;
@@ -75,8 +82,8 @@ Color getRandomRedOrGreenColor() {
 // return random picture (rainbow or arrow)
 String getRandomPhoto() {
   final List<String> photoAssets = [
-    'asserts/images/arrows2.png',
-    'asserts/images/rainbow2.jpeg'
+    'assets/images/arrows2.png',
+    'assets/images/rainbow2.jpeg'
   ];
 
   Random random = Random();
@@ -87,22 +94,24 @@ String getRandomPhoto() {
 
 class _GamePageState extends State<GamePage> {
   bool isButtonPressed = false;
-  // Icon randomArrow = getRandomArrow();
-  // String randomPhoto = getRandomPhoto();
   Icon randomArrow = const Icon(
     Icons.arrow_back,
     color: Colors.black,
   );
-  String randomPhoto = 'asserts/images/black.png';
+  String blackImg = 'assets/images/black.png';
+  String veryGoodImg = 'assets/images/verygood.png';
+  String randomPhoto = 'assets/images/black.png';
   int startTime = 0;
   int endTime = 0;
+  int round = 0;
 
   void _handleCenterButtonPressDown() {
-    startTime = DateTime.now().microsecondsSinceEpoch * 1000;
+    startTime = DateTime.now().microsecondsSinceEpoch;
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         randomArrow = getRandomArrow();
         randomPhoto = getRandomPhoto();
+        pressedButton = true;
         isButtonPressed = true;
         print("the time when the user pressed the center button: $startTime");
       });
@@ -111,7 +120,8 @@ class _GamePageState extends State<GamePage> {
 
   void _handleCenterButtonPressUp() {
     setState(() {
-      endTime = DateTime.now().microsecondsSinceEpoch * 1000;
+      endTime = DateTime.now().microsecondsSinceEpoch;
+      // pressedButton = false;
       isButtonPressed = false;
       print("the time when the user released the center button: $endTime");
       int time_of_holding_the_button = endTime - startTime;
@@ -121,73 +131,143 @@ class _GamePageState extends State<GamePage> {
 
   void _handleOneOfTheCircelsIsPressed() {
     if (endTime > startTime) {
-      int elapsedNanoseconds =
-          DateTime.now().microsecondsSinceEpoch * 1000 - endTime;
-      print("response time: $elapsedNanoseconds nanoseconds");
+      int elapsedNanoseconds = DateTime.now().microsecondsSinceEpoch - endTime;
+      print("response time: $elapsedNanoseconds microseconds");
     }
     setState(() {
+      pressedButton = false;
       randomArrow = const Icon(
         Icons.arrow_back,
         color: Colors.black,
       );
-      randomPhoto = 'asserts/images/black.png';
+      Future.delayed(Duration(milliseconds: 100), () {
+        randomPhoto = 'assets/images/black.png';
+      });
     });
   }
 
-  // void _handleButtonPress() {
-  //   Future.delayed(Duration(seconds: 2), () {
-  //     setState(() {
-  //       containerColor = Colors.purple;
-  //     });
-  //   });
-  // }
+  Future<ButtonConfig> loadButtonConfig() async {
+    String jsonString =
+        await rootBundle.loadString('assets/buttons/red_button.json');
+    Map<String, dynamic> jsonMap = json.decode(jsonString);
+    return ButtonConfig.fromJson(jsonMap);
+  }
 
-  // void _handleReturnToFirstPage() {
-  //   setState(() {
-  //     containerColor = Colors.grey;
-  //   });
-  // }
+  Future<ButtonConfig> loadButtonConfig1() async {
+    String jsonString =
+        await rootBundle.loadString('assets/buttons/green_button.json');
+    Map<String, dynamic> jsonMap = json.decode(jsonString);
+    return ButtonConfig.fromJson(jsonMap);
+  }
+
+  FutureBuilder<ButtonConfig> getGreenCircle() {
+    return FutureBuilder<ButtonConfig>(
+      future: loadButtonConfig1(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          final buttonConfig = snapshot.data!;
+          // redCircle = redColor;
+          return StyledButton(
+            // red button
+            buttonConfig: buttonConfig,
+            onPressed: () async {
+              final lastRow = await UserSheetsApi.getRowCount();
+              setState(() {
+                if ((isRanbow && isRed) || (!isRanbow && !isRightArrow)) {
+                  UserSheetsApi.updateCell(
+                    id: lastRow,
+                    key: 'wrongAnswers',
+                    value: ++wrongAnswers,
+                  );
+                  randomPhoto = blackImg;
+                  print("wrong");
+                } else {
+                  UserSheetsApi.updateCell(
+                    id: lastRow,
+                    key: 'correctAnswers',
+                    value: ++correctAnswers,
+                  );
+                  randomPhoto = veryGoodImg;
+                }
+                _handleOneOfTheCircelsIsPressed();
+                startTime = 0;
+                endTime = 0;
+              });
+            },
+          );
+        }
+      },
+    );
+  }
+
+  FutureBuilder<ButtonConfig> getRedCircle() {
+    return FutureBuilder<ButtonConfig>(
+      future: loadButtonConfig(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          final buttonConfig = snapshot.data!;
+          redColor = Color(int.parse(
+            buttonConfig.buttonColor.replaceAll('#', '0x'),
+          ));
+          return StyledButton(
+            // red button
+            buttonConfig: buttonConfig,
+            onPressed: () async {
+              final last = await UserSheetsApi.getRowCount();
+              setState(() {
+                if ((isRanbow && !isRed) || (!isRanbow && isRightArrow)) {
+                  UserSheetsApi.updateCell(
+                    id: last,
+                    key: 'wrongAnswers',
+                    value: ++wrongAnswers,
+                  );
+                  randomPhoto = blackImg;
+                  print("wrong");
+                } else {
+                  UserSheetsApi.updateCell(
+                    id: last,
+                    key: 'correctAnswers',
+                    value: ++correctAnswers,
+                  );
+                  randomPhoto = veryGoodImg;
+                }
+                _handleOneOfTheCircelsIsPressed();
+                startTime = 0;
+                endTime = 0;
+              });
+            },
+          );
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Trial $round out of 30',
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Row(
         children: [
           Expanded(
             flex: 1,
             child: Center(
-              child: ElevatedButton(
-                // red button
-                onPressed: () async {
-                  final last = await UserSheetsApi.getRowCount();
-                  setState(() {
-                    if ((isRanbow && !isRed) || (!isRanbow && isRightArrow)) {
-                      UserSheetsApi.updateCell(
-                        id: last,
-                        key: 'wrongAnswers',
-                        value: ++wrongAnswers,
-                      );
-                      print("wrong");
-                    } else {
-                      UserSheetsApi.updateCell(
-                        id: last,
-                        key: 'correctAnswers',
-                        value: ++correctAnswers,
-                      );
-                    }
-                    _handleOneOfTheCircelsIsPressed();
-                    // _handleReturnToFirstPage();
-                    startTime = 0;
-                    endTime = 0;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(20),
-                ),
-                child: const Text(""),
-              ),
+              child: getRedCircle(),
             ),
           ),
           Expanded(
@@ -220,6 +300,7 @@ class _GamePageState extends State<GamePage> {
                         setState(() {
                           _handleCenterButtonPressDown();
                           containerColor = Colors.purple;
+                          round++;
                         });
                       },
                       onTapUp: (_) {
@@ -249,38 +330,7 @@ class _GamePageState extends State<GamePage> {
           Expanded(
             flex: 1,
             child: Center(
-              child: ElevatedButton(
-                // green button
-                onPressed: () async {
-                  final lastRow = await UserSheetsApi.getRowCount();
-                  setState(() {
-                    if ((isRanbow && isRed) || (!isRanbow && !isRightArrow)) {
-                      UserSheetsApi.updateCell(
-                        id: lastRow,
-                        key: 'wrongAnswers',
-                        value: ++wrongAnswers,
-                      );
-                      print("wrong");
-                    } else {
-                      UserSheetsApi.updateCell(
-                        id: lastRow,
-                        key: 'correctAnswers',
-                        value: ++correctAnswers,
-                      );
-                    }
-                    _handleOneOfTheCircelsIsPressed();
-                    // _handleReturnToFirstPage();
-                    startTime = 0;
-                    endTime = 0;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(20),
-                ),
-                child: const Text(""),
-              ),
+              child: getGreenCircle(),
             ),
           ),
         ],
